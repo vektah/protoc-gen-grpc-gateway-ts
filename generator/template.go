@@ -37,17 +37,30 @@ type Base{{.Name}} = {
 {{- range .NonOneOfFields}}
   {{fieldName .Name}}?: {{tsType .}}
 {{- end}}
+{{range $groupId, $fields := .OneOfFieldsGroups }}
+{{range $index, $field := $fields }}  {{ fieldName $field.Name }}?: {{tsType $field}}
+{{ end }}
+{{- end -}}
 }
 
-export type {{.Name}} = Base{{.Name}}
-{{range $groupId, $fields := .OneOfFieldsGroups}}  & OneOf<{ {{range $index, $field := $fields}}{{fieldName $field.Name}}: {{tsType $field}}{{if (lt (add $index 1) (len $fields))}}; {{end}}{{end}} }>
-{{end}}
+export type {{.Name}} = Base{{.Name -}}
+{{range $groupId, $fields := .OneOfFieldsGroups }}
+	& ( {{range $index, $field := $fields -}} {
+		{{- range $i, $f := $fields -}}
+			{{- if ne $i $index}}{{ fieldName $f.Name }}: never
+				{{- if (lt (add $i 1) (len $fields))}}; {{end -}}
+			{{end}}
+		{{- end}} }|
+
+{{- end}}{})
+{{- end }}
 {{- else -}}
 export type {{.Name}} = {
 {{- range .Fields}}
   {{fieldName .Name}}?: {{tsType .}}
 {{- end}}
 }
+
 {{end}}
 {{end}}{{end}}
 
@@ -74,16 +87,6 @@ export type {{.Name}} = {
 * This file is a generated Typescript file for GRPC Gateway, DO NOT MODIFY
 */
 {{if .Dependencies}}{{- include "dependencies" .StableDependencies -}}{{end}}
-{{- if .NeedsOneOfSupport}}
-type Absent<T, K extends keyof T> = { [k in Exclude<keyof T, K>]?: undefined };
-type OneOf<T> =
-  | { [k in keyof T]?: undefined }
-  | (
-    keyof T extends infer K ?
-      (K extends string & keyof T ? { [k in K]: T[K] } & Absent<T, K>
-        : never)
-    : never);
-{{end}}
 {{- if .Enums}}{{include "enums" .Enums}}{{end}}
 {{- if .Messages}}{{include "messages" .Messages}}{{end}}
 {{- if .Services}}{{include "services" .Services}}{{end}}

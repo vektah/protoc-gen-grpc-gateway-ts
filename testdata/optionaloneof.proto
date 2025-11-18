@@ -1,0 +1,21 @@
+syntax = 'proto2';
+
+package com.squareup.cash.gap;
+
+message Thinger {
+  optional string name = 1;
+  oneof oneof1 {
+    string A = 2;
+    string B = 3;
+    int32 C = 4;
+    int32 D = 5;
+    int32 E = 6;
+    int32 F = 7;
+  }
+
+  oneof oneof2 {
+    string X = 10;
+    string Y = 11;
+    int32 Z = 12;
+  }
+}

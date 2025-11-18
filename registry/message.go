@@ -78,5 +78,7 @@ func (r *Registry) analyseMessage(fileData *data.File, packageName, fileName str
 		r.analyseField(fileData, data, packageName, f)
 	}
 
+	r.collapseOneOffOneOfs(fileData, data, packageName)
+
 	fileData.Messages = append(fileData.Messages, data)
 }

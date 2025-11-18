@@ -92,3 +92,16 @@ func (r *Registry) analyseField(fileData *data.File, msgData *data.Message, pack
 
 	fileData.TrackPackageNonScalarType(fieldData)
 }
+
+func (r *Registry) collapseOneOffOneOfs(fileData *data.File, msgData *data.Message, packageName string) {
+	// proto optional fields are encoded as one ofs with only one field inside. But in TS its quite expensive to have OneOfs in our union types, so instead we collapse them back to normal optional fields.
+	for index, fields := range msgData.OneOfFieldsGroups {
+		if len(fields) == 1 {
+			field := fields[0]
+			field.IsOneOfField = false
+			field.OneOfIndex = -1
+			msgData.NonOneOfFields = append(msgData.NonOneOfFields, field)
+			delete(msgData.OneOfFieldsGroups, index)
+		}
+	}
+}
